@@ -8,13 +8,15 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-
+console.log("APP.JS")
+console.log("loading routes")
 var routes = require('./routes/index');
 var users = require('./routes/users');
-
+console.log("start app")
 var app = express();
 
 // view engine setup
+console.log("set view engine")
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -23,6 +25,8 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+console.log("auth system init")
 app.use(cookieParser());
 app.use(require('express-session')({
     secret: 'keyboard cat',
@@ -33,7 +37,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+console.log("using routes")
 app.use('/', routes);
 
 // passport config
@@ -41,7 +45,7 @@ var Account = require('./models/account');
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
-
+console.log("connect mongodb")
 // mongoose
 mongoose.connect('mongodb://localhost/passport_local_mongoose_express4');
 
@@ -76,5 +80,5 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
+console.log("export app")
 module.exports = app;
