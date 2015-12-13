@@ -3,15 +3,10 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+
 console.log("APP.JS")
-console.log("loading routes")
-var routes = require('./routes/index');
-var users = require('./routes/users');
 console.log("start app")
 var app = express();
 
@@ -19,45 +14,54 @@ var app = express();
 console.log("set view engine")
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-console.log("auth system init")
+app.use(express.static(path.join(__dirname, 'public')));
+console.log("loading routes")
+var routes = require('./routes/index');
+var users = require('./routes/users');
+app.use('/', routes);
+//--------------------
+// session config
+console.log("sess system init")
+var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 app.use(require('express-session')({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: false
 }));
+
+//--------------------
+// passport config
+console.log("auth system init")
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var Account = require('./models/account');
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.static(path.join(__dirname, 'public')));
 
-console.log("using routes")
-app.use('/', routes);
-
-// passport config
-var Account = require('./models/account');
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
+
+//--------------------
+// mongo config
 console.log("connect mongodb")
 // mongoose
 mongoose.connect('mongodb://localhost/passport_local_mongoose_express4');
 
+//--------------------
+// error handlers
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
-
-// error handlers
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
@@ -69,7 +73,6 @@ if (app.get('env') === 'development') {
         });
     });
 }
-
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
