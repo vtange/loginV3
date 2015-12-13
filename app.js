@@ -22,7 +22,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 console.log("loading routes")
 var routes = require('./routes/index');
-var users = require('./routes/users');
 app.use('/', routes);
 //--------------------
 // session config
